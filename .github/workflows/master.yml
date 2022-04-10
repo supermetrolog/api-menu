@@ -16,8 +16,8 @@ jobs:
       with:
           php-version: '7.4'
 
-    - name: Install Packages
-      run: composer install
+    # - name: Install Packages
+    #   run: composer install
     
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
