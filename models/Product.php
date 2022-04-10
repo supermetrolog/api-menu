@@ -23,6 +23,7 @@ use Yii;
  * @property string $created_at
  * @property string|null $updated_at
  *
+ * @property SubCategory $subCategory
  * @property ProductIngredient[] $productIngredients
  */
 class Product extends \yii\db\ActiveRecord
@@ -47,6 +48,7 @@ class Product extends \yii\db\ActiveRecord
             [['price', 'price_old', 'price_from', 'price_to', 'voluem', 'voluem_from', 'voluem_to'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
             [['title'], 'string', 'max' => 255],
+            [['sub_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => SubCategory::className(), 'targetAttribute' => ['sub_category_id' => 'id']],
         ];
     }
 
@@ -75,6 +77,16 @@ class Product extends \yii\db\ActiveRecord
     }
 
     /**
+     * Gets query for [[SubCategory]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSubCategory()
+    {
+        return $this->hasOne(SubCategory::className(), ['id' => 'sub_category_id']);
+    }
+
+    /**
      * Gets query for [[ProductIngredients]].
      *
      * @return \yii\db\ActiveQuery
@@ -82,5 +94,10 @@ class Product extends \yii\db\ActiveRecord
     public function getProductIngredients()
     {
         return $this->hasMany(ProductIngredient::className(), ['product_id' => 'id']);
+    }
+
+    public function getIngredients()
+    {
+        return $this->hasMany(Ingredient::className(), ['id' => 'ingredient_id'])->via('productIngredients');
     }
 }

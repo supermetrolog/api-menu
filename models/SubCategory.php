@@ -12,6 +12,9 @@ use Yii;
  * @property int $category_id
  * @property string $created_at
  * @property string|null $updated_at
+ *
+ * @property Product[] $products
+ * @property Category $category
  */
 class SubCategory extends \yii\db\ActiveRecord
 {
@@ -33,6 +36,7 @@ class SubCategory extends \yii\db\ActiveRecord
             [['category_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['title'], 'string', 'max' => 255],
+            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Category::className(), 'targetAttribute' => ['category_id' => 'id']],
         ];
     }
 
@@ -48,5 +52,25 @@ class SubCategory extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    /**
+     * Gets query for [[Products]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProducts()
+    {
+        return $this->hasMany(Product::className(), ['sub_category_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Category]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCategory()
+    {
+        return $this->hasOne(Category::className(), ['id' => 'category_id']);
     }
 }

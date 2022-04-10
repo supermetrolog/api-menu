@@ -19,5 +19,23 @@ return
             'controller' => 'site',
             'except' => [],
 
+        ],
+        [
+            'class' => 'yii\rest\UrlRule',
+            'controller' => 'product',
+            'except' => [],
+
+        ],
+        [
+            'class' => 'yii\rest\UrlRule',
+            'controller' => 'sub-category',
+            'except' => [],
+
+        ],
+        [
+            'class' => 'yii\rest\UrlRule',
+            'controller' => 'category',
+            'except' => [],
+
         ]
     ];
