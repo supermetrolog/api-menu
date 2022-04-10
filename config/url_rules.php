@@ -36,6 +36,5 @@ return
             'class' => 'yii\rest\UrlRule',
             'controller' => 'category',
             'except' => [],
-
         ]
     ];

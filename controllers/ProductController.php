@@ -27,8 +27,9 @@ class ProductController extends ActiveController
 
     public function actions()
     {
-        $actons = parent::actions();
-        unset($actons['index']);
+        $actions = parent::actions();
+        unset($actions['index']);
+        return $actions;
     }
 
     public function actionIndex()
