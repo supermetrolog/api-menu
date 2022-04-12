@@ -40,7 +40,7 @@ class SubCategorySearch extends SubCategory
      */
     public function search($params)
     {
-        $query = SubCategory::find()->with(['products.ingredients']);
+        $query = SubCategory::find()->with(['products.ingredients'])->andWhere(['status' => SubCategory::STATUS_ACTIVE]);
 
         // add conditions that should always apply here
 

@@ -7,6 +7,7 @@ use yii\web\NotFoundHttpException;
 use app\behaviors\BaseControllerBehaviors;
 use app\models\Category;
 use app\models\CategorySearch;
+use yii\web\ForbiddenHttpException;
 use Yii;
 
 class CategoryController extends ActiveController
@@ -21,9 +22,20 @@ class CategoryController extends ActiveController
     {
         $actions = parent::actions();
         unset($actions['index']);
+        unset($actions['delete']);
         return $actions;
     }
-
+    public function actionDelete($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->subCategories) {
+            throw new ForbiddenHttpException("Вы не можете удалить категорию, если у категории есть подкатегории.");
+        }
+        if ($model->delete()) {
+            return ['message' => 'Вы удалили категорию ' . $model->title, 'data' => null];
+        }
+        return ['message' => 'Ошибка удаления категории ' . $model->title, 'data' => null];
+    }
     public function actionIndex()
     {
         $searchModel = new CategorySearch();

@@ -16,6 +16,8 @@ use Yii;
  */
 class Category extends \yii\db\ActiveRecord
 {
+    public const STATUS_ACTIVE = 1;
+    public const STATUS_INACTIVE = 0;
     /**
      * {@inheritdoc}
      */
@@ -31,6 +33,7 @@ class Category extends \yii\db\ActiveRecord
     {
         return [
             [['title'], 'required'],
+            [['status'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['title'], 'string', 'max' => 255],
         ];
@@ -46,7 +49,14 @@ class Category extends \yii\db\ActiveRecord
             'title' => 'Title',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'status' => 'Status',
         ];
+    }
+
+    public function delete()
+    {
+        $this->status = self::STATUS_INACTIVE;
+        return $this->save();
     }
 
     /**
@@ -56,6 +66,6 @@ class Category extends \yii\db\ActiveRecord
      */
     public function getSubCategories()
     {
-        return $this->hasMany(SubCategory::className(), ['category_id' => 'id']);
+        return $this->hasMany(SubCategory::className(), ['category_id' => 'id'])->where(['status' => SubCategory::STATUS_ACTIVE]);
     }
 }

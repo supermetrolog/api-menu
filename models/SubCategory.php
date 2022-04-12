@@ -18,6 +18,8 @@ use Yii;
  */
 class SubCategory extends \yii\db\ActiveRecord
 {
+    public const STATUS_ACTIVE = 1;
+    public const STATUS_INACTIVE = 0;
     /**
      * {@inheritdoc}
      */
@@ -33,7 +35,7 @@ class SubCategory extends \yii\db\ActiveRecord
     {
         return [
             [['title', 'category_id'], 'required'],
-            [['category_id'], 'integer'],
+            [['category_id', 'status'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['title'], 'string', 'max' => 255],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Category::className(), 'targetAttribute' => ['category_id' => 'id']],
@@ -51,9 +53,15 @@ class SubCategory extends \yii\db\ActiveRecord
             'category_id' => 'Category ID',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'status' => 'Status'
         ];
     }
 
+    public function delete()
+    {
+        $this->status = self::STATUS_INACTIVE;
+        return $this->save();
+    }
     /**
      * Gets query for [[Products]].
      *
@@ -61,7 +69,7 @@ class SubCategory extends \yii\db\ActiveRecord
      */
     public function getProducts()
     {
-        return $this->hasMany(Product::className(), ['sub_category_id' => 'id']);
+        return $this->hasMany(Product::className(), ['sub_category_id' => 'id'])->where(['status' => Product::STATUS_ACTIVE]);
     }
 
     /**

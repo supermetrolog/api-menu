@@ -40,7 +40,7 @@ class CategorySearch extends Category
      */
     public function search($params)
     {
-        $query = Category::find()->with('subCategories.products.ingredients');
+        $query = Category::find()->with('subCategories.products.ingredients')->andWhere(['status' => Category::STATUS_ACTIVE]);
 
         // add conditions that should always apply here
 

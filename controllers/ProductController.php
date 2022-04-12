@@ -17,18 +17,12 @@ class ProductController extends ActiveController
         $behaviors = parent::behaviors();
         return BaseControllerBehaviors::getBaseBehaviors($behaviors, ['index']);
     }
-    protected function findModel($id)
-    {
-        if (($model = Product::findOne($id)) !== null) {
-            return $model;
-        }
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
 
     public function actions()
     {
         $actions = parent::actions();
         unset($actions['index']);
+        unset($actions['delete']);
         return $actions;
     }
 
@@ -36,5 +30,21 @@ class ProductController extends ActiveController
     {
         $searchModel = new ProductSearch();
         return $searchModel->search(Yii::$app->request->queryParams);
+    }
+    public function actionDelete($id)
+    {
+        $model = $this->findModel($id);
+        if ($model->delete()) {
+            return ['message' => 'Вы удалили продукт ' . $model->title, 'data' => null];
+        }
+        return ['message' => 'Ошибка удаления продукта ' . $model->title, 'data' => null];
+    }
+
+    protected function findModel($id)
+    {
+        if (($model = Product::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

@@ -41,7 +41,7 @@ class ProductSearch extends Product
      */
     public function search($params)
     {
-        $query = Product::find()->with(['subCategory', 'ingredients']);
+        $query = Product::find()->with(['subCategory', 'ingredients'])->andWhere(['status' => Product::STATUS_ACTIVE]);
 
         // add conditions that should always apply here
 

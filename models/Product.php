@@ -28,6 +28,8 @@ use Yii;
  */
 class Product extends \yii\db\ActiveRecord
 {
+    public const STATUS_ACTIVE = 1;
+    public const STATUS_INACTIVE = 0;
     /**
      * {@inheritdoc}
      */
@@ -44,7 +46,7 @@ class Product extends \yii\db\ActiveRecord
         return [
             [['title', 'sub_category_id'], 'required'],
             [['description'], 'string'],
-            [['sub_category_id', 'voluem_type', 'is_new'], 'integer'],
+            [['sub_category_id', 'voluem_type', 'is_new', 'status'], 'integer'],
             [['price', 'price_old', 'price_from', 'price_to', 'voluem', 'voluem_from', 'voluem_to'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
             [['title'], 'string', 'max' => 255],
@@ -73,7 +75,14 @@ class Product extends \yii\db\ActiveRecord
             'is_new' => 'Is New',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'status' => 'Status',
         ];
+    }
+
+    public function delete()
+    {
+        $this->status = self::STATUS_INACTIVE;
+        return $this->save();
     }
 
     /**
