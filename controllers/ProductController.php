@@ -25,6 +25,7 @@ class ProductController extends ActiveController
         unset($actions['index']);
         unset($actions['delete']);
         unset($actions['create']);
+        unset($actions['update']);
         return $actions;
     }
 
@@ -36,6 +37,10 @@ class ProductController extends ActiveController
     public function actionCreate()
     {
         return Product::createProduct(Yii::$app->request->post());
+    }
+    public function actionUpdate($id)
+    {
+        return Product::updateProduct($this->findModel($id), Yii::$app->request->post());
     }
     public function actionIngredients()
     {

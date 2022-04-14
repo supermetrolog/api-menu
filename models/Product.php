@@ -132,6 +132,23 @@ class Product extends \yii\db\ActiveRecord
             throw $th;
         }
     }
+    public static function updateProduct($model, $post_data)
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            if ($model->load($post_data, '') && $model->save()) {
+                $model->createIngredients($post_data['ingredients']);
+                $model->createProductIngredients($post_data['ingredients'], $model->id);
+                $transaction->commit();
+                return ['message' => 'Продукт изменен', 'data' => $model->id];
+            }
+
+            throw new ValidationErrorHttpException($model->getErrorSummary(false));
+        } catch (\Throwable $th) {
+            $transaction->rollBack();
+            throw $th;
+        }
+    }
     /**
      * Gets query for [[SubCategory]].
      *
