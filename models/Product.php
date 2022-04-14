@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\exceptions\ValidationErrorHttpException;
 use Yii;
 
 /**
@@ -84,7 +85,53 @@ class Product extends \yii\db\ActiveRecord
         $this->status = self::STATUS_INACTIVE;
         return $this->save();
     }
+    public function createIngredients($post_data)
+    {
+        if (!$post_data || !is_array($post_data)) {
+            return true;
+        }
+        foreach ($post_data as $ingredient) {
+            $model = new Ingredient();
+            $model->title = $ingredient['title'];
+            if (!$model->save()) {
+                throw new ValidationErrorHttpException($model->getErrorSummary(false));
+            }
+        }
+    }
+    public function createProductIngredients($post_data, $product_id)
+    {
+        ProductIngredient::deleteAll(['product_id' => $product_id]);
+        if (!$post_data || !is_array($post_data)) {
+            return true;
+        }
+        foreach ($post_data as $ingredient) {
+            $modelIngredient = Ingredient::find()->where(['title' => $ingredient['title']])->limit(1)->one();
+            $modelProductIngredient = new ProductIngredient();
+            $modelProductIngredient->product_id = $product_id;
+            $modelProductIngredient->ingredient_id = $modelIngredient->id;
+            if (!$modelProductIngredient->save()) {
+                throw new ValidationErrorHttpException($modelProductIngredient->getErrorSummary(false));
+            }
+        }
+    }
+    public static function createProduct($post_data)
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        $model = new static();
+        try {
+            if ($model->load($post_data, '') && $model->save()) {
+                $model->createIngredients($post_data['ingredients']);
+                $model->createProductIngredients($post_data['ingredients'], $model->id);
+                $transaction->commit();
+                return ['message' => 'Продукт создан', 'data' => $model->id];
+            }
 
+            throw new ValidationErrorHttpException($model->getErrorSummary(false));
+        } catch (\Throwable $th) {
+            $transaction->rollBack();
+            throw $th;
+        }
+    }
     /**
      * Gets query for [[SubCategory]].
      *

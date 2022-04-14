@@ -49,6 +49,18 @@ class Ingredient extends \yii\db\ActiveRecord
         ];
     }
 
+    public function save($withValidate = true, $defaultSave = false)
+    {
+        if ($defaultSave) {
+            return parent::save($withValidate);
+        }
+        $isExistModel = self::find()->where(['title' => $this->title])->exists();
+
+        if ($isExistModel) {
+            return true;
+        }
+        return parent::save($withValidate);
+    }
     /**
      * Gets query for [[ProductIngredients]].
      *

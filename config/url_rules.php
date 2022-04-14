@@ -18,13 +18,14 @@ return
             'class' => 'yii\rest\UrlRule',
             'controller' => 'site',
             'except' => [],
-
         ],
         [
             'class' => 'yii\rest\UrlRule',
             'controller' => 'product',
             'except' => [],
-
+            'extraPatterns' => [
+                'GET,OPTIONS ingredients' => 'ingredients',
+            ],
         ],
         [
             'class' => 'yii\rest\UrlRule',

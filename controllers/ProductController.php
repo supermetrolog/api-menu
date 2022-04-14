@@ -5,6 +5,7 @@ namespace app\controllers;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use app\behaviors\BaseControllerBehaviors;
+use app\models\Ingredient;
 use app\models\Product;
 use app\models\ProductSearch;
 use Yii;
@@ -15,7 +16,7 @@ class ProductController extends ActiveController
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-        return BaseControllerBehaviors::getBaseBehaviors($behaviors, ['index']);
+        return BaseControllerBehaviors::getBaseBehaviors($behaviors, ['index', 'ingredients']);
     }
 
     public function actions()
@@ -23,6 +24,7 @@ class ProductController extends ActiveController
         $actions = parent::actions();
         unset($actions['index']);
         unset($actions['delete']);
+        unset($actions['create']);
         return $actions;
     }
 
@@ -30,6 +32,14 @@ class ProductController extends ActiveController
     {
         $searchModel = new ProductSearch();
         return $searchModel->search(Yii::$app->request->queryParams);
+    }
+    public function actionCreate()
+    {
+        return Product::createProduct(Yii::$app->request->post());
+    }
+    public function actionIngredients()
+    {
+        return Ingredient::find()->all();
     }
     public function actionDelete($id)
     {
