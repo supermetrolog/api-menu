@@ -8,6 +8,8 @@ use app\behaviors\BaseControllerBehaviors;
 use app\models\Category;
 use app\models\CategorySearch;
 use yii\web\ForbiddenHttpException;
+use yii\web\UploadedFile;
+use app\models\UploadFile;
 use Yii;
 
 class CategoryController extends ActiveController
@@ -23,6 +25,9 @@ class CategoryController extends ActiveController
         $actions = parent::actions();
         unset($actions['index']);
         unset($actions['delete']);
+        unset($actions['create']);
+        unset($actions['update']);
+
         return $actions;
     }
     public function actionDelete($id)
@@ -40,6 +45,20 @@ class CategoryController extends ActiveController
     {
         $searchModel = new CategorySearch();
         return $searchModel->search(Yii::$app->request->queryParams);
+    }
+    public function actionCreate()
+    {
+        $request = json_decode(Yii::$app->request->post('data'), true);
+        $model = new UploadFile();
+        $model->files = UploadedFile::getInstancesByName('files');
+        return Category::createCategory($request, $model);
+    }
+    public function actionUpdate($id)
+    {
+        $request = json_decode(Yii::$app->request->post('data'), true);
+        $model = new UploadFile();
+        $model->files = UploadedFile::getInstancesByName('files');
+        return Category::updateCategory($this->findModel($id), $request, $model);
     }
     protected function findModel($id)
     {

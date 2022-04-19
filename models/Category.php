@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\exceptions\ValidationErrorHttpException;
 use Yii;
 
 /**
@@ -35,7 +36,7 @@ class Category extends \yii\db\ActiveRecord
             [['title'], 'required'],
             [['status'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['title'], 'string', 'max' => 255],
+            [['title', 'image'], 'string', 'max' => 255],
         ];
     }
 
@@ -47,18 +48,92 @@ class Category extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'title' => 'Title',
+            'image' => 'Image',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'status' => 'Status',
         ];
     }
+    // private function updateFiles($post_data, $uploadFileModel)
+    // {
+    //     File::deleteAll(['category_id' => $this->id]);
+    //     foreach ($post_data['files'] as $file) {
+    //         $model = new File();
+    //         if (!$model->load($file, '') || !$model->save()) {
+    //             throw new ValidationErrorHttpException($model->getErrorSummary(false));
+    //         }
+    //     }
+    //     $this->uploadFiles($uploadFileModel);
+    // }
+    public function uploadFiles($uploadFileModel, $model)
+    {
+        foreach ($uploadFileModel->files as $file) {
+            if (!$uploadFileModel->uploadOne($file)) {
+                throw new ValidationErrorHttpException($uploadFileModel->getErrorSummary(false));
+            }
+            $model->image = $uploadFileModel->filename;
+        }
+        return $model;
+    }
+    // private function uploadFiles($uploadFileModel)
+    // {
+    //     foreach ($uploadFileModel->files as $file) {
+    //         if (!$uploadFileModel->uploadOne($file)) {
+    //             throw new ValidationErrorHttpException($uploadFileModel->getErrorSummary(false));
+    //         }
+    //         $companyFileModel = new File();
+    //         $companyFileModel->category_id = $this->id;
+    //         $companyFileModel->name = $file->name;
+    //         $companyFileModel->type = $file->type;
+    //         $companyFileModel->filename = $uploadFileModel->filename;
+    //         $companyFileModel->size = (string)$file->size;
+    //         if (!$companyFileModel->save()) {
+    //             throw new ValidationErrorHttpException($companyFileModel->getErrorSummary(false));
+    //         }
+    //     }
+    // }
+    public static function createCategory($post_data, $fileManager)
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        $model = new static();
 
+        try {
+            if ($model->load($post_data, '')) {
+                $model = $model->uploadFiles($fileManager, $model);
+                if ($model->save()) {
+                    $transaction->commit();
+                    return ['message' => 'Категория создана.', 'data' => true];
+                }
+            }
+            throw new ValidationErrorHttpException($model->getErrorSummary(false));
+        } catch (\Throwable $th) {
+            $transaction->rollBack();
+            throw $th;
+        }
+    }
+    public static function updateCategory($model, $post_data, $fileManager)
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            if ($model->load($post_data, '')) {
+                $model = $model->uploadFiles($fileManager, $model);
+                if ($model->save()) {
+                    $transaction->commit();
+                    return ['message' => 'Категория изменена.', 'data' => true];
+                }
+            }
+            // throw new ValidationErrorHttpException($model->getErrorSummary(false));
+            throw new ValidationErrorHttpException($model->load($post_data, ''));
+        } catch (\Throwable $th) {
+            $transaction->rollBack();
+            throw $th;
+        }
+    }
     public function delete()
     {
         $this->status = self::STATUS_INACTIVE;
         return $this->save();
     }
-
     /**
      * Gets query for [[SubCategories]].
      *
