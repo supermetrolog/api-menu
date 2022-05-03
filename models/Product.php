@@ -118,7 +118,7 @@ class Product extends \yii\db\ActiveRecord
     public function uploadFiles($uploadFileModel, $model)
     {
         foreach ($uploadFileModel->files as $file) {
-            if (!$uploadFileModel->uploadOne($file)) {
+            if (!$uploadFileModel->uploadOne($file, 20)) {
                 throw new ValidationErrorHttpException($uploadFileModel->getErrorSummary(false));
             }
             $model->image = $uploadFileModel->filename;

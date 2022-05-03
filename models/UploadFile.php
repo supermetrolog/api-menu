@@ -40,21 +40,50 @@ class UploadFile extends Model
             return false;
         }
     }
-    public function uploadOne($file)
+    public function uploadOne($file, $compression = null)
     {
         if ($this->validate()) {
             $this->filename = $this->generateFileName($file);
             $filepath = $this->getFullPathForSave();
+
+
             if (!$file->saveAs($filepath, false)) {
                 $this->addError('UploadFile', 'Ошибка загрузки файлов!');
             }
-            // $imgPath = Yii::getAlias('@app') . "/public_html/$filepath";
-            // $img = Imagick::open($imgPath);
-            // $img->resize($img->getWidth(), $img->getWidth())->saveTo($imgPath);
+
+            if ($compression !== null) {
+                $this->compressionImage($compression, $file, $filepath);
+            }
             return true;
         } else {
             return false;
         }
+    }
+    private function compressionImage($compression, $file, $filepath)
+    {
+        if ($file->extension == "png") {
+            return true;
+        }
+        $imagePath = Yii::getAlias('@app') . "/public_html/$filepath";
+        $img = new \Imagick($imagePath);
+
+        $imagick = new \Imagick();
+
+        $imagick->setCompression(\Imagick::COMPRESSION_JPEG);
+        $imagick->setCompressionQuality($compression);
+        $imagick->newPseudoImage(
+            $img->getImageWidth(),
+            $img->getImageHeight(),
+            'canvas:white'
+        );
+        $imagick->compositeImage(
+            $img,
+            \Imagick::COMPOSITE_ATOP,
+            0,
+            0
+        );
+        $imagick->setImageFormat($file->extension);
+        $imagick->writeImage($imagePath);
     }
     public function getFullPathForSave()
     {
