@@ -54,17 +54,6 @@ class Category extends \yii\db\ActiveRecord
             'status' => 'Status',
         ];
     }
-    // private function updateFiles($post_data, $uploadFileModel)
-    // {
-    //     File::deleteAll(['category_id' => $this->id]);
-    //     foreach ($post_data['files'] as $file) {
-    //         $model = new File();
-    //         if (!$model->load($file, '') || !$model->save()) {
-    //             throw new ValidationErrorHttpException($model->getErrorSummary(false));
-    //         }
-    //     }
-    //     $this->uploadFiles($uploadFileModel);
-    // }
     public function uploadFiles($uploadFileModel, $model)
     {
         foreach ($uploadFileModel->files as $file) {
@@ -75,23 +64,6 @@ class Category extends \yii\db\ActiveRecord
         }
         return $model;
     }
-    // private function uploadFiles($uploadFileModel)
-    // {
-    //     foreach ($uploadFileModel->files as $file) {
-    //         if (!$uploadFileModel->uploadOne($file)) {
-    //             throw new ValidationErrorHttpException($uploadFileModel->getErrorSummary(false));
-    //         }
-    //         $companyFileModel = new File();
-    //         $companyFileModel->category_id = $this->id;
-    //         $companyFileModel->name = $file->name;
-    //         $companyFileModel->type = $file->type;
-    //         $companyFileModel->filename = $uploadFileModel->filename;
-    //         $companyFileModel->size = (string)$file->size;
-    //         if (!$companyFileModel->save()) {
-    //             throw new ValidationErrorHttpException($companyFileModel->getErrorSummary(false));
-    //         }
-    //     }
-    // }
     public static function createCategory($post_data, $fileManager)
     {
         $transaction = Yii::$app->db->beginTransaction();

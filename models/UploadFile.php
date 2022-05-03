@@ -5,6 +5,7 @@ namespace app\models;
 use Exception;
 use yii\base\Model;
 use yii\web\UploadedFile;
+use tpmanc\imagick\Imagick;
 use Yii;
 
 class UploadFile extends Model
@@ -47,6 +48,9 @@ class UploadFile extends Model
             if (!$file->saveAs($filepath, false)) {
                 $this->addError('UploadFile', 'Ошибка загрузки файлов!');
             }
+            // $imgPath = Yii::getAlias('@app') . "/public_html/$filepath";
+            // $img = Imagick::open($imgPath);
+            // $img->resize($img->getWidth(), $img->getWidth())->saveTo($imgPath);
             return true;
         } else {
             return false;

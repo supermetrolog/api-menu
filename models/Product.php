@@ -50,7 +50,7 @@ class Product extends \yii\db\ActiveRecord
             [['sub_category_id', 'voluem_type', 'is_new', 'status'], 'integer'],
             [['price', 'price_old', 'price_from', 'price_to', 'voluem', 'voluem_from', 'voluem_to'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
-            [['title'], 'string', 'max' => 255],
+            [['title', 'image'], 'string', 'max' => 255],
             [['sub_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => SubCategory::className(), 'targetAttribute' => ['sub_category_id' => 'id']],
         ];
     }
@@ -77,6 +77,7 @@ class Product extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'status' => 'Status',
+            'image' => 'Image'
         ];
     }
 
@@ -114,16 +115,29 @@ class Product extends \yii\db\ActiveRecord
             }
         }
     }
-    public static function createProduct($post_data)
+    public function uploadFiles($uploadFileModel, $model)
+    {
+        foreach ($uploadFileModel->files as $file) {
+            if (!$uploadFileModel->uploadOne($file)) {
+                throw new ValidationErrorHttpException($uploadFileModel->getErrorSummary(false));
+            }
+            $model->image = $uploadFileModel->filename;
+        }
+        return $model;
+    }
+    public static function createProduct($post_data, $fileManager)
     {
         $transaction = Yii::$app->db->beginTransaction();
         $model = new static();
         try {
-            if ($model->load($post_data, '') && $model->save()) {
-                $model->createIngredients($post_data['ingredients']);
-                $model->createProductIngredients($post_data['ingredients'], $model->id);
-                $transaction->commit();
-                return ['message' => 'Продукт создан', 'data' => $model->id];
+            if ($model->load($post_data, '')) {
+                $model = $model->uploadFiles($fileManager, $model);
+                if ($model->save()) {
+                    $model->createIngredients($post_data['ingredients']);
+                    $model->createProductIngredients($post_data['ingredients'], $model->id);
+                    $transaction->commit();
+                    return ['message' => 'Продукт создан', 'data' => $model->id];
+                }
             }
 
             throw new ValidationErrorHttpException($model->getErrorSummary(false));
@@ -132,15 +146,18 @@ class Product extends \yii\db\ActiveRecord
             throw $th;
         }
     }
-    public static function updateProduct($model, $post_data)
+    public static function updateProduct($model, $post_data, $fileManager)
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            if ($model->load($post_data, '') && $model->save()) {
-                $model->createIngredients($post_data['ingredients']);
-                $model->createProductIngredients($post_data['ingredients'], $model->id);
-                $transaction->commit();
-                return ['message' => 'Продукт изменен', 'data' => $model->id];
+            if ($model->load($post_data, '')) {
+                $model = $model->uploadFiles($fileManager, $model);
+                if ($model->save()) {
+                    $model->createIngredients($post_data['ingredients']);
+                    $model->createProductIngredients($post_data['ingredients'], $model->id);
+                    $transaction->commit();
+                    return ['message' => 'Продукт изменен', 'data' => $model->id];
+                }
             }
 
             throw new ValidationErrorHttpException($model->getErrorSummary(false));

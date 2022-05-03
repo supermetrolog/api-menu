@@ -8,6 +8,8 @@ use app\behaviors\BaseControllerBehaviors;
 use app\models\Ingredient;
 use app\models\Product;
 use app\models\ProductSearch;
+use yii\web\UploadedFile;
+use app\models\UploadFile;
 use Yii;
 
 class ProductController extends ActiveController
@@ -36,11 +38,17 @@ class ProductController extends ActiveController
     }
     public function actionCreate()
     {
-        return Product::createProduct(Yii::$app->request->post());
+        $request = json_decode(Yii::$app->request->post('data'), true);
+        $model = new UploadFile();
+        $model->files = UploadedFile::getInstancesByName('files');
+        return Product::createProduct($request, $model);
     }
     public function actionUpdate($id)
     {
-        return Product::updateProduct($this->findModel($id), Yii::$app->request->post());
+        $request = json_decode(Yii::$app->request->post('data'), true);
+        $model = new UploadFile();
+        $model->files = UploadedFile::getInstancesByName('files');
+        return Product::updateProduct($this->findModel($id), $request, $model);
     }
     public function actionIngredients()
     {
